@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Cumpleaños Silvia!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+            perspective: 1000px;
+        }
+
+        /* Abeja cursor */
+        #cursor-bee {
+            position: fixed;
+            top: 0;
+            left: 0;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.08s ease-out;
+            will-change: transform;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* TARJETAS */
+        .welcome-card, .quiz-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            margin-top: 60px;
+            border: 4px solid #FFD700;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-corner {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 80px;
+            height: 80px;
+            background: #FFD700;
+            transform: rotate(45deg);
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            color: #d35400;
+            font-size: 3rem;
+            margin: 10px 0;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        /* BOTONES */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin: 12px 0;
+            border: 2px solid #8BC34A;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 1.15rem;
+            transition: 0.3s;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .quiz-option:hover {
+            background: #8BC34A;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .hidden { display: none; }
+
+        /* LÍNEA DE TIEMPO */
+        .timeline {
+            position: relative;
+            margin-top: 60px;
+            padding-bottom: 100px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: repeating-linear-gradient(to bottom, #8BC34A 0, #8BC34A 10px, transparent 10px, transparent 20px);
+            z-index: -1;
+        }
+
+        .timeline-item {
+            margin: 60px 0;
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            perspective: 1500px;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%; 
+            max-width: 600px; /* Un poco más ancho para fotos grandes */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: left;
+            position: relative;
+            border-bottom: 5px solid #FFD700;
+            
+            /* Animación 3D inicial */
+            opacity: 0;
+            transform-origin: top center;
+            transform: rotateX(-90deg); 
+            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+        }
+
+        .timeline-item.visible .timeline-content {
+            opacity: 1;
+            transform: rotateX(0deg);
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 50%;
+            top: -25px;
+            transform: translateX(-50%);
+            background: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 4px solid #FFD700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 5;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        /* MARCO POLAROID AJUSTADO PARA FOTOS LARGAS */
+        .photo-frame {
+            width: 100%;
+            /* Aumentamos altura máxima para fotos 1920px */
+            max-height: 650px; 
+            background-color: #fff;
+            padding: 10px;
+            padding-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            transform: rotate(-1deg);
+            transition: transform 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-frame:hover {
+            transform: rotate(0deg) scale(1.01);
+        }
+        
+        .photo-frame img {
+            max-width: 100%;
+            max-height: 100%; /* Ajusta al alto del contenedor */
+            width: auto;      /* Mantiene proporción */
+            height: auto;
+            display: block;
+            border: 1px solid #eee;
+        }
+
+        .note-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #444;
+            font-style: italic;
+        }
+
+        #error-msg {
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+            padding: 10px;
+            border-radius: 8px;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .planted-flower {
+            position: absolute;
+            font-size: 2rem;
+            pointer-events: none;
+            animation: grow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
+        }
+
+        @keyframes grow {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .timeline-content { width: 85%; }
+            h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="Music_Background.mp3" type="audio/mpeg">
+        <source src="Music_Background.mp3" type="audio/mp3">
+    </audio>
+
+    <div id="cursor-bee">🐝</div>
+
+    <div class="container">
+        
+        <!-- 1. BIENVENIDA -->
+        <div class="welcome-card" id="step1">
+            <div class="card-corner"></div>
+            <h1 style="color:#e67e22;">¡Hola Silvia!</h1>
+            <p style="font-size: 1.3rem;">De Ecuador 🇪🇨 para Rusia 🇷🇺</p>
+            <p>Hay un regalo digital esperándote...</p>
+            <p style="color:#888; font-size:0.9rem;">(Pista: Haz clic en el fondo para plantar flores 🌸)</p>
+            <br>
+            <button class="quiz-option" onclick="nextStep()" style="background:#FFD700; color:#333; border:none; font-weight:bold; font-size:1.3rem; box-shadow: 0 4px 0 #cfaf00;">
+                Abrir Regalo 🎁
+            </button>
+        </div>
+
+        <!-- 2. QUIZ -->
+        <div class="quiz-card hidden" id="step2">
+            <h2>Pregunta de Seguridad 🔐</h2>
+            <p style="font-size:1.2rem;">¿Qué es lo que más le gusta a la Silvia?</p>
+            
+            <button class="quiz-option" onclick="wrongAnswer('arabes')">👳‍♂️ Los árabes</button>
+            <button class="quiz-option" onclick="correctAnswer()">🌻 Los girasoles y su tierrita</button>
+            <button class="quiz-option" onclick="wrongAnswer('plata')">💰 La plata</button>
+            
+            <div id="error-msg"></div>
+        </div>
+
+        <!-- 3. TIMELINE -->
+        <div class="hidden" id="step3">
+            <h1 style="margin-top:20px; color:#d35400;">¡Feliz Cumpleaños!</h1>
+            <p>Desliza para abrir tus cartas 👇</p>
+            
+            <div class="timeline" id="gallery-container"></div>
+
+            <div style="margin-top:80px; padding-bottom:50px;">
+                <h2>💛 Te extrañamos mucho 💛</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN DE DATOS ---
+        // 'ext': define si es png o jpg. Si no pones nada, asume jpg.
+        const timelineData = [
+            { 
+                id: 1, 
+                title: "La Esencia",
+                ext: "png", // IMAGEN PNG
+                text: "Que estemos lejos me ha enseñado que las amistades verdaderas no se miden por la frecuencia, sino por la esencia. Y resulta que la nuestra es de esas que, cuando nos volvemos a encontrar, es como si el tiempo no hubiera pasado y el cariño sigue intacto." 
+            },
+            { id: 2, title: "Momentos", text: "Coleccionando sonrisas y buenos tiempos que valen oro." },
+            { 
+                id: 3, 
+                title: "Aventuras", 
+                ext: "png", // IMAGEN PNG
+                text: "Cada foto es una historia que vale la pena recordar una y otra vez." 
+            },
+            { 
+                id: 4, 
+                title: "Tu Magia",
+                text: "Gracias por ser la alegría de esos días grises, por tus locuras, por esa magia que solo tú tienes." 
+            },
+            { 
+                id: 5, 
+                title: "Risas", 
+                ext: "png", // IMAGEN PNG
+                text: "La felicidad se ve mejor cuando es compartida (y con un poco de locura)." 
+            },
+            { 
+                id: 6, 
+                title: "Random",
+                text: "Algunas imágenes random de relleno, no se nos ocurrió que poner 🤪 pero igual te ves genial." 
+            },
+            { id: 7, title: "Recuerdos", text: "Instantes que se quedan grabados para siempre en el corazón." },
+            { id: 8, title: "Amistad", text: "Aunque pasen los años y los kilómetros, la conexión sigue intacta." },
+            { 
+                id: 9, 
+                title: "Tu Huella",
+                text: "Nos dejaste recuerdos bonitos para llenar el vacío que dejaste y recordar con alegría esos momentos. Ojalá en un futuro vuelvan esas excusas para salir a lokear." 
+            },
+            { 
+                id: 10, 
+                title: "Aquí te esperamos",
+                text: "Recuerda que aquí te esperamos para crear nuevos momentos y recuerdos inolvidables." 
+            },
+            { 
+                id: 11, 
+                title: "Tu Lugar",
+                text: "Tienes una familia que te quiere y te ama, amigos que te extrañan y están orgullosos de ti. Estás cumpliendo metas y sueños por allá, pero siempre tendrás un lugar aquí." 
+            }
+        ];
+
+        // --- GENERADOR ---
+        const galleryContainer = document.getElementById('gallery-container');
+        const icons = ['🌻', '🐝', '✨', '💛', '🌸', '📸'];
+
+        timelineData.forEach((item, index) => {
+            const icon = icons[index % icons.length];
+            // Si el item tiene 'ext', usa esa extensión, si no, usa 'jpg' por defecto
+            const extension = item.ext || 'jpg';
+            
+            const html = `
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-icon">${icon}</div>
+                        <h3 style="color:#d35400; margin-top:15px;">${item.title}</h3>
+                        <div class="photo-frame">
+                            <img src="images/FCS_${item.id}.${extension}" alt="Foto ${item.id}" onerror="this.src='https://via.placeholder.com/400x600?text=Error+Carga'">
+                        </div>
+                        <p class="note-text">"${item.text}"</p>
+                    </div>
+                </div>
+            `;
+            galleryContainer.innerHTML += html;
+        });
+
+        // --- INTERACCIÓN ---
+        const bee = document.getElementById('cursor-bee');
+        let mouseX = 0, mouseY = 0;
+        let beeX = 0, beeY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateBee() {
+            beeX += (mouseX - beeX) * 0.1;
+            beeY += (mouseY - beeY) * 0.1;
+            bee.style.left = (beeX + 15) + 'px';
+            bee.style.top = (beeY + 15) + 'px';
+            requestAnimationFrame(animateBee);
+        }
+        animateBee();
+
+        document.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON') return;
+            const flower = document.createElement('div');
+            const flowers = ['🌻', '🌸', '🌹', '🌷', '🌼', '🌺'];
+            flower.innerText = flowers[Math.floor(Math.random() * flowers.length)];
+            flower.classList.add('planted-flower');
+            flower.style.left = (e.pageX - 15) + 'px';
+            flower.style.top = (e.pageY - 15) + 'px';
+            flower.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
+            document.body.appendChild(flower);
+        });
+
+        function nextStep() {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        function wrongAnswer(type) {
+            const msg = document.getElementById('error-msg');
+            msg.style.display = 'block';
+            msg.style.backgroundColor = '#ffebee';
+            msg.style.color = '#c62828';
+            
+            if(type === 'arabes') {
+                msg.innerText = "Jajaja 😂 Bueno... quizás sí, pero hoy NO es la respuesta correcta.";
+            } else if (type === 'plata') {
+                msg.innerText = "¡A todos! 💸 Pero hay algo más importante en tu corazón...";
+            }
+        }
+
+        function correctAnswer() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            const audio = document.getElementById('bgMusic');
+            audio.volume = 0.6;
+            audio.play().catch(e => console.log("Audio requiere toque previo"));
+            celebrate();
+            setTimeout(revealItems, 300);
+        }
+
+        function celebrate() {
+            for(let i=0; i<40; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.innerText = Math.random() > 0.5 ? '🐝' : '🌻';
+                    el.style.position = 'fixed';
+                    el.style.left = Math.random() * 100 + 'vw';
+                    el.style.top = '-50px';
+                    el.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                    el.style.transition = 'top 3s ease-in, transform 3s linear';
+                    el.style.zIndex = '100';
+                    document.body.appendChild(el);
+                    setTimeout(() => { 
+                        el.style.top = '110vh'; 
+                        el.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    }, 50);
+                    setTimeout(() => el.remove(), 3100);
+                }, i * 80);
+            }
+        }
+
+        window.addEventListener('scroll', revealItems);
+
+        function revealItems() {
+            const items = document.querySelectorAll('.timeline-item');
+            const windowHeight = window.innerHeight;
+            const elementVisible = 150;
+
+            items.forEach(item => {
+                const elementTop = item.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    item.classList.add('visible');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
