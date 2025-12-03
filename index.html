@@ -127,7 +127,7 @@
             padding: 25px;
             border-radius: 15px;
             width: 90%; 
-            max-width: 600px; /* Un poco más ancho para fotos grandes */
+            max-width: 600px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: left;
             position: relative;
@@ -166,7 +166,6 @@
         /* MARCO POLAROID AJUSTADO PARA FOTOS LARGAS */
         .photo-frame {
             width: 100%;
-            /* Aumentamos altura máxima para fotos 1920px */
             max-height: 650px; 
             background-color: #fff;
             padding: 10px;
@@ -186,8 +185,8 @@
         
         .photo-frame img {
             max-width: 100%;
-            max-height: 100%; /* Ajusta al alto del contenedor */
-            width: auto;      /* Mantiene proporción */
+            max-height: 100%; 
+            width: auto;      
             height: auto;
             display: block;
             border: 1px solid #eee;
@@ -287,19 +286,18 @@
 
     <script>
         // --- CONFIGURACIÓN DE DATOS ---
-        // 'ext': define si es png o jpg. Si no pones nada, asume jpg.
         const timelineData = [
             { 
                 id: 1, 
                 title: "La Esencia",
-                ext: "png", // IMAGEN PNG
+                ext: "png", 
                 text: "Que estemos lejos me ha enseñado que las amistades verdaderas no se miden por la frecuencia, sino por la esencia. Y resulta que la nuestra es de esas que, cuando nos volvemos a encontrar, es como si el tiempo no hubiera pasado y el cariño sigue intacto." 
             },
             { id: 2, title: "Momentos", text: "Coleccionando sonrisas y buenos tiempos que valen oro." },
             { 
                 id: 3, 
                 title: "Aventuras", 
-                ext: "png", // IMAGEN PNG
+                ext: "png", 
                 text: "Cada foto es una historia que vale la pena recordar una y otra vez." 
             },
             { 
@@ -310,7 +308,7 @@
             { 
                 id: 5, 
                 title: "Risas", 
-                ext: "png", // IMAGEN PNG
+                ext: "png", 
                 text: "La felicidad se ve mejor cuando es compartida (y con un poco de locura)." 
             },
             { 
@@ -343,16 +341,16 @@
 
         timelineData.forEach((item, index) => {
             const icon = icons[index % icons.length];
-            // Si el item tiene 'ext', usa esa extensión, si no, usa 'jpg' por defecto
             const extension = item.ext || 'jpg';
             
+            // CAMBIO AQUÍ: Se eliminó "images/" de la ruta src
             const html = `
                 <div class="timeline-item">
                     <div class="timeline-content">
                         <div class="timeline-icon">${icon}</div>
                         <h3 style="color:#d35400; margin-top:15px;">${item.title}</h3>
                         <div class="photo-frame">
-                            <img src="images/FCS_${item.id}.${extension}" alt="Foto ${item.id}" onerror="this.src='https://via.placeholder.com/400x600?text=Error+Carga'">
+                            <img src="FCS_${item.id}.${extension}" alt="Foto ${item.id}" onerror="this.src='https://via.placeholder.com/400x600?text=Error+Carga'">
                         </div>
                         <p class="note-text">"${item.text}"</p>
                     </div>
