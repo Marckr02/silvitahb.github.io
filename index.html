@@ -7,6 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap');
 
+        /* --- CORRECCIÓN 1: Evitar el scroll horizontal y el temblor general --- */
         body {
             margin: 0;
             padding: 0;
@@ -15,10 +16,11 @@
             font-family: 'Quicksand', sans-serif;
             overflow-x: hidden;
             cursor: crosshair;
+            /* Suavizado de fuentes y optimización 3D */
+            -webkit-font-smoothing: antialiased;
             perspective: 1000px;
         }
 
-        /* Abeja cursor */
         #cursor-bee {
             position: fixed;
             top: 0;
@@ -26,8 +28,8 @@
             font-size: 2rem;
             pointer-events: none;
             z-index: 9999;
-            transition: transform 0.08s ease-out;
-            will-change: transform;
+            transition: transform 0.1s ease-out; /* Transición más suave */
+            will-change: transform, left, top;
             filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
         }
 
@@ -40,7 +42,6 @@
             z-index: 10;
         }
 
-        /* TARJETAS */
         .welcome-card, .quiz-card {
             background: rgba(255, 255, 255, 0.95);
             padding: 40px;
@@ -48,9 +49,9 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
             margin-top: 60px;
             border: 4px solid #FFD700;
-            transition: all 0.5s ease;
             position: relative;
-            overflow: hidden;
+            /* CORRECCIÓN 2: Quitar transition: all para evitar parpadeos */
+            transition: opacity 0.3s ease; 
         }
 
         .card-corner {
@@ -71,7 +72,6 @@
             text-shadow: 1px 1px 0px #fff;
         }
 
-        /* BOTONES */
         .quiz-option {
             display: block;
             width: 100%;
@@ -82,7 +82,7 @@
             background: white;
             cursor: pointer;
             font-size: 1.15rem;
-            transition: 0.3s;
+            transition: background 0.3s, transform 0.2s; /* Transiciones específicas */
             font-weight: bold;
             color: #555;
         }
@@ -95,7 +95,6 @@
 
         .hidden { display: none; }
 
-        /* LÍNEA DE TIEMPO */
         .timeline {
             position: relative;
             margin-top: 60px;
@@ -114,7 +113,7 @@
         }
 
         .timeline-item {
-            margin: 60px 0;
+            margin: 80px 0; /* Más espacio entre cartas para que no se amontonen */
             position: relative;
             width: 100%;
             display: flex;
@@ -122,6 +121,7 @@
             perspective: 1500px;
         }
 
+        /* --- CORRECCIÓN 3: Estabilidad de la animación de cartas --- */
         .timeline-content {
             background: white;
             padding: 25px;
@@ -133,11 +133,13 @@
             position: relative;
             border-bottom: 5px solid #FFD700;
             
-            /* Animación 3D inicial */
+            /* Animación 3D optimizada */
             opacity: 0;
             transform-origin: top center;
-            transform: rotateX(-90deg); 
-            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+            transform: rotateX(-60deg); /* Angulo menos agresivo para reducir flickering */
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+            backface-visibility: hidden; /* Clave para evitar parpadeo en animación 3D */
+            will-change: transform, opacity;
         }
 
         .timeline-item.visible .timeline-content {
@@ -163,17 +165,19 @@
             box-shadow: 0 5px 10px rgba(0,0,0,0.1);
         }
 
-        /* MARCO POLAROID AJUSTADO PARA FOTOS LARGAS */
+        /* --- CORRECCIÓN 4: IMÁGENES AJUSTADAS --- */
         .photo-frame {
             width: 100%;
-            max-height: 650px; 
             background-color: #fff;
             padding: 10px;
-            padding-bottom: 30px;
+            padding-bottom: 25px; /* Estilo Polaroid */
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             margin-bottom: 15px;
+            margin-top: 15px;
             transform: rotate(-1deg);
             transition: transform 0.3s;
+            
+            /* Flexbox para centrar la imagen dentro del marco */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -184,11 +188,12 @@
         }
         
         .photo-frame img {
-            max-width: 100%;
-            max-height: 100%; 
-            width: auto;      
-            height: auto;
             display: block;
+            width: auto;             /* El ancho se adapta */
+            height: auto;            /* El alto se adapta */
+            max-width: 100%;         /* No salirse del ancho del contenedor */
+            max-height: 600px;       /* Límite de altura para que fotos largas no sean eternas */
+            object-fit: contain;     /* NUNCA recortar la imagen, siempre mostrarla entera */
             border: 1px solid #eee;
         }
 
@@ -197,6 +202,7 @@
             line-height: 1.6;
             color: #444;
             font-style: italic;
+            margin-top: 15px;
         }
 
         #error-msg {
@@ -232,6 +238,8 @@
         @media (max-width: 600px) {
             .timeline-content { width: 85%; }
             h1 { font-size: 2.5rem; }
+            /* En móvil las imágenes pueden ser un poco más pequeñas */
+            .photo-frame img { max-height: 450px; }
         }
     </style>
 </head>
@@ -285,7 +293,7 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN DE DATOS ---
+        // --- DATOS ---
         const timelineData = [
             { 
                 id: 1, 
@@ -309,15 +317,15 @@
                 id: 5, 
                 title: "Risas", 
                 ext: "png", 
-                text: "La felicidad se ve mejor cuando es compartida (y con un poco de locura)." 
+                text: "La felicidad se ve mejor cuando es compartida y viene en frascos pequeños (como tú)." 
             },
             { 
                 id: 6, 
                 title: "Random",
-                text: "Algunas imágenes random de relleno, no se nos ocurrió que poner 🤪 pero igual te ves genial." 
+                text: "Algunas imágenes random de relleno, no se nos ocurrió que poner." 
             },
             { id: 7, title: "Recuerdos", text: "Instantes que se quedan grabados para siempre en el corazón." },
-            { id: 8, title: "Amistad", text: "Aunque pasen los años y los kilómetros, la conexión sigue intacta." },
+            { id: 8, title: "Amistad", text: "Aunque pasen los años y los kilómetros, la amistad sigue intacta." },
             { 
                 id: 9, 
                 title: "Tu Huella",
@@ -343,14 +351,13 @@
             const icon = icons[index % icons.length];
             const extension = item.ext || 'jpg';
             
-            // CAMBIO AQUÍ: Se eliminó "images/" de la ruta src
             const html = `
                 <div class="timeline-item">
                     <div class="timeline-content">
                         <div class="timeline-icon">${icon}</div>
                         <h3 style="color:#d35400; margin-top:15px;">${item.title}</h3>
                         <div class="photo-frame">
-                            <img src="FCS_${item.id}.${extension}" alt="Foto ${item.id}" onerror="this.src='https://via.placeholder.com/400x600?text=Error+Carga'">
+                            <img src="FCS_${item.id}.${extension}" alt="Foto ${item.id}" onerror="this.src='https://via.placeholder.com/400x600?text=Foto+No+Encontrada'">
                         </div>
                         <p class="note-text">"${item.text}"</p>
                     </div>
@@ -370,6 +377,7 @@
         });
 
         function animateBee() {
+            // Suavizado del movimiento
             beeX += (mouseX - beeX) * 0.1;
             beeY += (mouseY - beeY) * 0.1;
             bee.style.left = (beeX + 15) + 'px';
@@ -379,7 +387,9 @@
         animateBee();
 
         document.addEventListener('click', (e) => {
-            if(e.target.tagName === 'BUTTON') return;
+            // Evitar plantar flores si se clickea un botón
+            if(e.target.closest('button')) return;
+            
             const flower = document.createElement('div');
             const flowers = ['🌻', '🌸', '🌹', '🌷', '🌼', '🌺'];
             flower.innerText = flowers[Math.floor(Math.random() * flowers.length)];
@@ -415,7 +425,8 @@
             audio.volume = 0.6;
             audio.play().catch(e => console.log("Audio requiere toque previo"));
             celebrate();
-            setTimeout(revealItems, 300);
+            // Pequeño retraso para dar tiempo al navegador a renderizar antes de animar
+            setTimeout(revealItems, 200);
         }
 
         function celebrate() {
@@ -444,11 +455,12 @@
         function revealItems() {
             const items = document.querySelectorAll('.timeline-item');
             const windowHeight = window.innerHeight;
-            const elementVisible = 150;
+            const elementVisible = 100; // Margen de activación
 
             items.forEach(item => {
-                const elementTop = item.getBoundingClientRect().top;
-                if (elementTop < windowHeight - elementVisible) {
+                const rect = item.getBoundingClientRect();
+                // Verificamos si el elemento está visible en la ventana
+                if (rect.top < windowHeight - elementVisible && rect.bottom > 0) {
                     item.classList.add('visible');
                 }
             });
